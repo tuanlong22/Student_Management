@@ -323,13 +323,37 @@ def category():
     cate_table.heading('Mã số sinh viên', text = 'Mã số sinh viên')
     cate_table.heading('Họ và tên', text = 'Họ và tên')
     cate_table.heading('Xếp loại', text = 'Xếp loại')
-    cate_table.configure(show='headings')
-    query = 'call Phanloaisinhvien()'
-    mycursor.execute(query)
-    fetched_data = mycursor.fetchall()
-    cate_table.delete(*cate_table.get_children())
-    for data in fetched_data:
-            cate_table.insert('',END, values=data)
+    cate_table.configure(show='headings')   
+    try:
+        procedure_sql = '''
+        CREATE PROCEDURE Phanloaisinhvien()
+        BEGIN
+            SELECT 
+                HoTen,
+                DiemTichLuy,
+                CASE 
+            WHEN DiemTichLuy > 3.6 THEN 'Xuất Sắc'
+            WHEN DiemTichLuy >= 3.2 AND DiemTichLuy <= 3.6 THEN 'Giỏi'
+            WHEN DiemTichLuy >= 2.5 AND DiemTichLuy < 3.2 THEN 'Khá'
+            ELSE 'Trung Bình'
+        END AS XepLoai
+        FROM sinh_vien;
+        END;
+        '''
+        query = 'call Phanloaisinhvien()'
+        mycursor.execute(procedure_sql)
+        mycursor.execute(query)
+        fetched_data = mycursor.fetchall()
+        cate_table.delete(*cate_table.get_children())
+        for data in fetched_data:
+                cate_table.insert('',END, values=data)
+    except:
+        query = 'call Phanloaisinhvien()'
+        mycursor.execute(query)
+        fetched_data = mycursor.fetchall()
+        cate_table.delete(*cate_table.get_children())
+        for data in fetched_data:
+                cate_table.insert('',END, values=data)
             
 
 #Xuất file thông tin
